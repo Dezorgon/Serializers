@@ -1,8 +1,7 @@
 import math
 
-from dump import *
-from load import *
-import json
+from json_parser.dump import *
+from json_parser.load import *
 
 
 def test_kk():

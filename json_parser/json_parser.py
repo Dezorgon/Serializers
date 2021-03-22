@@ -48,10 +48,10 @@ def func(l):
 
 #print(''.join(obj_to_str(n)))
 
-with open('text.txt', 'w') as fp:
+with open('../text.txt', 'w') as fp:
     dump(abc, fp)
 
-with open('text.txt', 'r') as fp:
+with open('../text.txt', 'r') as fp:
     k = load(fp)
     print(k.f(5, 4))
 

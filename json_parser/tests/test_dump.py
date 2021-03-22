@@ -1,29 +1,28 @@
-from dump import *
+from json_parser.dump import *
 import json
 
-
 def test_kk():
-    assert obj_to_str(['foo', {'bar': ('baz', None, 1.0, 2)}]) == json.dumps(['foo', {'bar': ('baz', None, 1.0, 2)}])
+    assert obj_to_str(['foo', {'bar': ('baz', None, 1.0, 2)}]) == json_parser.dumps(['foo', {'bar': ('baz', None, 1.0, 2)}])
 
 
 def test_simple_type():
     items = (0, -1, 545453486545, '', -float('inf'), float('inf'), float('nan'), -121.46, -4654e-10, False, True,
              'fg', 'None', "1.65", -65)
     for item in items:
-        assert obj_to_str(item) == json.dumps(item)
-    assert obj_to_str('\\n') == json.dumps('\n')
+        assert obj_to_str(item) == json_parser.dumps(item)
+    assert obj_to_str('\\n') == json_parser.dumps('\n')
 
 
 def test_array():
     items = ([], [[[]]], list(), (), (()), [4], [[[True], -2], '3'], [1, [2.54, [3e-10]]], [(''), ""])
     for item in items:
-        assert obj_to_str(item) == json.dumps(item)
+        assert obj_to_str(item) == json_parser.dumps(item)
 
 
 def test_dict():
     items = [{}, {'a': {'b': {'c': 1}}}, dict(g=1), {'': 1}, {'': {'g': {'a': -1}, 'b': -14e-10}, 'c': ''}, {1: 1}]
     for item in items:
-        assert obj_to_str(item) == json.dumps(item)
+        assert obj_to_str(item) == json_parser.dumps(item)
 
 
 def test_func():
@@ -72,4 +71,4 @@ def test_object():
         cls_object = cls()
         attr = dict([(key, val) for key, val in inspect.getmembers(cls_object) if not key.startswith('__')])
         assert obj_to_str(cls_object) == \
-           f'object("{type(cls_object).__name__}"): {json.dumps(attr)}'
+           f'object("{type(cls_object).__name__}"): {json_parser.dumps(attr)}'
