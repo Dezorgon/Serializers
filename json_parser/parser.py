@@ -1,22 +1,21 @@
-from dump import obj_to_str
-from load import str_to_obj
+from json_parser.dump import obj_to_str
+from json_parser.load import str_to_obj
+from serializer_creator.parser_interface import Parser
 
 
-def dump(obj, fp):
-    fp.write(obj_to_str(obj))
+class JsonParser(Parser):
+    def dump(self, obj, fp):
+        fp.write(obj_to_str(obj))
 
+    def dumps(self, obj) -> str:
+        return obj_to_str(obj)
 
-def dumps(obj) -> str:
-    return obj_to_str(obj)
+    def load(self, fp):
+        doc = fp.read()
+        return str_to_obj(doc)
 
-
-def load(fp):
-    doc = fp.read()
-    return str_to_obj(doc)
-
-
-def loads(s):
-    return str_to_obj(s)
+    def loads(self, s):
+        return str_to_obj(s)
 
 
 class abc(object):
