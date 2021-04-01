@@ -12,9 +12,13 @@ class JsonParser(Parser):
 
     def load(self, fp):
         doc = fp.read()
+        if doc == '':
+            return ''
         return str_to_obj(doc)
 
     def loads(self, s):
+        if s == '':
+            return ''
         return str_to_obj(s)
 
 
@@ -37,20 +41,17 @@ class abc(object):
 
     m = gg()
 
+
+
 n = abc()
-
-
-def func(l):
-    l += 55
-    return l
 
 
 #print(''.join(obj_to_str(n)))
 
 with open('../text.txt', 'w') as fp:
-    dump(abc, fp)
+    JsonParser().dump(n, fp)
 
 with open('../text.txt', 'r') as fp:
-    k = load(fp)
+    k = JsonParser().load(fp)
     print(k.f(5, 4))
 

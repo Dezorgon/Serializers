@@ -1,5 +1,5 @@
 import inspect
-from tokens import *
+from json_parser.tokens import *
 
 
 def str_to_obj(doc):
@@ -70,8 +70,8 @@ def parse_class(tokens):
     return d[name]
 
 
-def parse_function(tokens, name):
-    return parse_class(tokens, name)
+def parse_function(tokens):
+    return parse_class(tokens)
 
 
 def parse_dict(tokens):

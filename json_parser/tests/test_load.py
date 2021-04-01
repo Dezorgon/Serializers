@@ -1,7 +1,6 @@
-import math
-
 from json_parser.dump import *
 from json_parser.load import *
+import math
 
 
 def test_kk():
@@ -81,10 +80,25 @@ def test_class():
     for cls in classes:
         assert obj_to_dict(str_to_obj(obj_to_str(cls))) == obj_to_dict(cls)
     str_to_obj(obj_to_str(class2)).a.f()
-test_class()
 
+class abc(object):
+    a = None
+    b = [1, (1, 5)]
+    c = False
+    d = "gds"
+    e = {"a": 11, "b": {1: 21, 2: 22}}
+
+    def f(self, s, k):
+        v = 1 + 2 + s - k
+        return v
+
+    class gg():
+        a = None
+        b = [1, (1, 5)]
+        c = False
+        d = 'gds'
 def test_object():
-    classes = (class1, class2, class3)
+    classes = (class1, class2, class3, abc)
     for cls in classes:
         cls_object = cls()
         assert obj_to_dict(str_to_obj(obj_to_str(cls))) == obj_to_dict(cls_object)

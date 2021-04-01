@@ -1,5 +1,4 @@
 import inspect
-import re
 import types
 
 _simple_type = (str, bool, int, float)
