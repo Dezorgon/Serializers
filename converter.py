@@ -18,16 +18,32 @@ def convert(deserializer, serializer, file_to_convert, file_to_save=None):
     if not isinstance(serializer, ParsersEnum):
         raise TypeError('deserializer must be an instance of ParsersEnum')
 
-    serializer_creator = deserializer.value()
-    serializer_obj = serializer_creator.create_serializer()
-    obj = serializer_obj.load(file_to_convert)
+    if deserializer == serializer:
+        return
+
+    if deserializer == ParsersEnum.PICKLE:
+        file_to_convert = open(file_to_convert, 'rb')
+    else:
+        file_to_convert = open(file_to_convert, 'r')
+    if file_to_save is not None:
+        if serializer == ParsersEnum.PICKLE:
+            file_to_save = open(file_to_save, 'w')
+        else:
+            file_to_save = open(file_to_save, 'wb')
+
+    deserializer_creator = deserializer.value()
+    deserializer_obj = deserializer_creator.create_serializer()
+    obj = deserializer_obj.load(file_to_convert)
     file_name = file_to_convert.name
     file_to_convert.close()
 
-    deserializer_creator = serializer.value()
-    deserializer_obj = deserializer_creator.create_serializer()
+    serializer_creator = serializer.value()
+    serializer_obj = serializer_creator.create_serializer()
     if file_to_save is None:
-        file_to_save = open(file_name, 'w')
-    deserializer_obj.dump(obj, file_to_save)
+        if serializer == ParsersEnum.PICKLE:
+            file_to_save = open(file_name, 'wb')
+        else:
+            file_to_save = open(file_name, 'w')
+    serializer_obj.dump(obj, file_to_save)
     file_to_save.close()
 
