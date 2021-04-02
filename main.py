@@ -1,19 +1,40 @@
 import argparse
 from converter import convert, ParsersEnum
+from serializer_creator.json_serializer_creator import JsonSerializerCreator
+
+formats = ['json', 'yaml', 'toml', 'pickle']
 
 
 def create_parser():
     parser = argparse.ArgumentParser(
         prog='wtf_converter',
-        usage='%(prog)s [A | [file_to_convert & format | file_to_save]]'
+        usage='%(prog)s [A | [file_to_convert & original_format & target_format | file_to_save]]'
     )
 
-    parser.add_argument('-cfg', '--config', type=argparse.FileType('r', encoding='UTF-8'), help='')
-    parser.add_argument('-f', '--format', choices=['json', 'pickle'])
+    parser.add_argument('-cfg', '--config', type=argparse.FileType('r', encoding='UTF-8'),
+                        help='JSON text configuration file')
+    parser.add_argument('-of', '--original_format', choices=formats)
+    parser.add_argument('-tf', '--target_format', choices=formats)
     parser.add_argument('-ftc', '--file_to_convert', type=argparse.FileType('r', encoding='UTF-8'))
-    parser.add_argument('-fts', '--file_to_save', type=argparse.FileType('r', encoding='UTF-8'))
+    parser.add_argument('-fts', '--file_to_save', type=argparse.FileType('w', encoding='UTF-8'))
 
     return parser
+
+
+def parse_config(fp):
+    parser = JsonSerializerCreator().create_serializer()
+    cfg = parser.load(fp)
+    try:
+        original_format = getattr(ParsersEnum, cfg['original_format'].upper())
+        target_format = getattr(ParsersEnum, cfg['target_format'].upper())
+        file_to_convert = open(cfg['file_to_convert'], 'r')
+        if 'file_to_save' in cfg:
+            file_to_save = open(cfg['file_to_save'], 'w')
+        else:
+            file_to_save = None
+    except Exception:
+        raise Exception('incorrect config')
+    return original_format, target_format, file_to_convert, file_to_save
 
 
 def main():
@@ -21,11 +42,14 @@ def main():
     args = parser.parse_args()
 
     if args.config is not None:
-        pass
-    elif args.format and args.file_to_convert is not None:
-        if args.file_to_save is not None:
-            convert(ParsersEnum.JSON, ParsersEnum.JSON, open('text.txt', 'r'), open('text2.txt', 'w'))
-            #close
+        cfg = parse_config(args.config)
+        convert(*cfg)
+    elif args.original_format and args.target_format and args.file_to_convert is not None:
+        original_format = getattr(ParsersEnum, args.original_format.upper())
+        target_format = getattr(ParsersEnum, args.target_format.upper())
+
+        if original_format != target_format:
+            convert(original_format, target_format, args.file_to_convert, args.file_to_save)
     else:
         parser.error('parameters --format and --file_to_convert are required together')
 

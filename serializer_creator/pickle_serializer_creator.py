@@ -1,8 +1,8 @@
 from serializer_creator.abstract_serializer_creator import AbstractSerializerCreator
-from parsers.json_parser.parser import JsonParser
+from parsers.pickle_parser.parser import PickleParser
 from serializer_creator.parser_interface import Parser
 
 
-class JsonSerializerCreator(AbstractSerializerCreator):
+class PickleSerializerCreator(AbstractSerializerCreator):
     def create_serializer(self) -> Parser:
-        return JsonParser()
+        return PickleParser()

@@ -7,7 +7,7 @@ class Parser(object):
         pass
 
     @abstractmethod
-    def dumps(self, obj) -> str:
+    def dumps(self, obj):
         pass
 
     @abstractmethod

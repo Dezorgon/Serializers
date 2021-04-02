@@ -1,5 +1,5 @@
 import inspect
-from json_parser.tokens import *
+from parsers.json_parser.tokens import *
 
 
 def str_to_obj(doc):

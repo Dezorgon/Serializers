@@ -1,5 +1,6 @@
-from json_parser.dump import *
 import json
+import inspect
+from parsers.json_parser.dump import obj_to_str
 
 
 def test_kk():

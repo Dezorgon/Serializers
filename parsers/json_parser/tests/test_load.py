@@ -1,6 +1,7 @@
-from json_parser.dump import *
-from json_parser.load import *
 import math
+import inspect
+from parsers.json_parser.dump import obj_to_str
+from parsers.json_parser.load import str_to_obj
 
 
 def test_kk():
