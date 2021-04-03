@@ -1,4 +1,6 @@
+import dis
 import inspect
+import opcode
 import types
 
 _simple_type = (str, bool, int, float)
@@ -38,16 +40,39 @@ def class_to_str(obj):
     yield f'class("{obj.__name__}"): "{source}"'
 
 
-def function_to_str(obj):
-    #source = re.sub(
-    #    r"def \w+\(",
-    #    "def func(",
-    #    str(inspect.getsource(obj))
-    #)
-    source = inspect.getsource(obj).replace('"', '\"').replace("'", '\'')
-    yield f'function("{obj.__name__}"): "{source}"'
-    #source = '\n' + '\n'.join(str(inspect.getsource(obj)).split('\n')[1:])
-    #yield 'function' + str(inspect.signature(obj)) + '{' + source + '}'
+STORE_GLOBAL = opcode.opmap['STORE_GLOBAL']
+DELETE_GLOBAL = opcode.opmap['DELETE_GLOBAL']
+LOAD_GLOBAL = opcode.opmap['LOAD_GLOBAL']
+GLOBAL_OPS = (STORE_GLOBAL, DELETE_GLOBAL, LOAD_GLOBAL)
+
+def _walk_global_ops(code):
+    for instr in dis.get_instructions(code):
+        op = instr.opcode
+        if op in GLOBAL_OPS:
+            yield op, instr.arg
+
+def f():
+     print(123)
+
+def function_to_str(func):
+    func = f
+    source = inspect.getsource(func).replace('"', '\"').replace("'", '\'')
+    co = compile(source, '<string>', 'exec')
+    #d = {}
+    #exec(co, d)
+    #d['f']()
+    print(co.co_consts[0].co_code)
+    #co = func.__code__
+    co = co.co_consts[0]
+    names = co.co_names
+    f_globals_ref = {names[oparg] for _, oparg in _walk_global_ops(co)}
+    f_globals = {k: obj_to_str(func.__globals__[k]) for k in f_globals_ref if k in func.__globals__}
+    gl = dict(**f_globals, **{'__builtins__': __builtins__})
+    f_globals = obj_to_str(f_globals)
+    fff = types.FunctionType(co, gl)
+    fff()
+    #source = inspect.getsource(obj).replace('"', '\"').replace("'", '\'')
+    yield f'function("{func.__name__}"): {source} {f_globals}'
 
 
 def complex_to_str(obj):
