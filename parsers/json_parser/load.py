@@ -66,6 +66,7 @@ def parse_class(tokens):
     #    bases = tokens.pop(0)
     # obj_dict = parse_dict(tokens)
     # return type(name, (), obj_dict)
+
     name = tokens.pop(0)
     d = {}
     source = tokens[0].strip()
