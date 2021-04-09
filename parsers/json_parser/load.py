@@ -1,4 +1,8 @@
+import copy
 import inspect
+import types
+from codecs import encode
+
 from parsers.json_parser.tokens import *
 
 
@@ -27,7 +31,7 @@ def bind_methods(obj):
 def tokens_to_obj(tokens):
     parsers = (parse_function, parse_class, parse_object, parse_dict, parse_array)
 
-    d = dict(zip(flags+('{', '['), parsers))
+    d = dict(zip(flags + ('{', '['), parsers))
 
     if tokens[0] in d:
         return d[tokens.pop(0)](tokens)
@@ -56,12 +60,12 @@ def parse_object(tokens):
 
 
 def parse_class(tokens):
-    #tokens.pop(0)
-    #if tokens[0] == 'class':
+    # tokens.pop(0)
+    # if tokens[0] == 'class':
     #    tokens.pop(0)
     #    bases = tokens.pop(0)
-    #obj_dict = parse_dict(tokens)
-    #return type(name, (), obj_dict)
+    # obj_dict = parse_dict(tokens)
+    # return type(name, (), obj_dict)
     name = tokens.pop(0)
     d = {}
     source = tokens[0].strip()
@@ -70,8 +74,65 @@ def parse_class(tokens):
     return d[name]
 
 
+def _make_cell():
+    if False:
+        cell = None
+    return (lambda: cell).__closure__[0]
+
+
 def parse_function(tokens):
-    return parse_class(tokens)
+    def f():
+        pass
+
+    name = tokens.pop(0)
+    tokens.pop(0)
+    d = parse_dict(tokens)
+
+    co: types.CodeType = compile(d['source'].strip(), '<string>', 'exec')
+    co = co.co_consts[0]
+    co_freevars = tuple(d['closure'].keys())
+    co_names = tuple([e for e in co.co_names if e not in d['closure']])
+    co_code = d['byte_code']
+    co_code = encode(co_code, "raw_unicode_escape")
+    co = co.replace(co_freevars=co_freevars, co_name=name, co_names=co_names, co_code=co_code)
+
+    gl = dict(**d['globals'], **{'__builtins__': __builtins__})
+
+    closure = []
+    for k in d['closure']:
+        cell = _make_cell()
+        cell.cell_contents = d['closure'][k]
+        closure.append(cell)
+
+    func = types.FunctionType(code=co, globals=gl, closure=tuple(closure))
+    return func
+
+
+def parse_function2(tokens):
+    def f():
+        pass
+
+    name = tokens.pop(0)
+    tokens.pop(0)
+    d = parse_dict(tokens)
+
+    co_freevars = tuple(d['closure'].keys())
+    co_names = tuple(d['names'])
+    co_code = d['byte_code']
+    co_code = encode(co_code, "raw_unicode_escape")
+    co = f.__code__
+    co = co.replace(co_freevars=co_freevars, co_name=name, co_names=co_names, co_code=co_code)
+
+    gl = dict(**d['globals'], **{'__builtins__': __builtins__})
+
+    closure = []
+    for k in d['closure']:
+        cell = _make_cell()
+        cell.cell_contents = d['closure'][k]
+        closure.append(cell)
+
+    func = types.FunctionType(code=co, globals=gl, closure=tuple(closure))
+    return func
 
 
 def parse_dict(tokens):
@@ -113,4 +174,3 @@ def parse_array(tokens):
             return _array
         if token != ',':
             raise Exception()
-

@@ -1,7 +1,9 @@
+import base64
 import dis
 import inspect
 import opcode
 import types
+from ast import literal_eval
 
 _simple_type = (str, bool, int, float)
 
@@ -40,10 +42,7 @@ def class_to_str(obj):
     yield f'class("{obj.__name__}"): "{source}"'
 
 
-STORE_GLOBAL = opcode.opmap['STORE_GLOBAL']
-DELETE_GLOBAL = opcode.opmap['DELETE_GLOBAL']
-LOAD_GLOBAL = opcode.opmap['LOAD_GLOBAL']
-GLOBAL_OPS = (STORE_GLOBAL, DELETE_GLOBAL, LOAD_GLOBAL)
+GLOBAL_OPS = (opcode.opmap['STORE_GLOBAL'], opcode.opmap['DELETE_GLOBAL'], opcode.opmap['LOAD_GLOBAL'])
 
 def _walk_global_ops(code):
     for instr in dis.get_instructions(code):
@@ -51,28 +50,43 @@ def _walk_global_ops(code):
         if op in GLOBAL_OPS:
             yield op, instr.arg
 
-def f():
-     print(123)
 
 def function_to_str(func):
-    func = f
     source = inspect.getsource(func).replace('"', '\"').replace("'", '\'')
-    co = compile(source, '<string>', 'exec')
-    #d = {}
-    #exec(co, d)
-    #d['f']()
-    print(co.co_consts[0].co_code)
-    #co = func.__code__
-    co = co.co_consts[0]
+    co = func.__code__
     names = co.co_names
-    f_globals_ref = {names[oparg] for _, oparg in _walk_global_ops(co)}
-    f_globals = {k: obj_to_str(func.__globals__[k]) for k in f_globals_ref if k in func.__globals__}
-    gl = dict(**f_globals, **{'__builtins__': __builtins__})
-    f_globals = obj_to_str(f_globals)
-    fff = types.FunctionType(co, gl)
-    fff()
-    #source = inspect.getsource(obj).replace('"', '\"').replace("'", '\'')
-    yield f'function("{func.__name__}"): {source} {f_globals}'
+    _globals = {names[oparg] for _, oparg in _walk_global_ops(co)}
+    _globals = {k: func.__globals__[k] for k in _globals if k in func.__globals__}
+    _closure = dict()
+    if func.__closure__ is not None:
+        _closure = dict((co.co_freevars[i], c.cell_contents) for i, c in enumerate(func.__closure__))
+
+    _names = tuple([e for e in co.co_names if e not in _closure.keys()])
+    _globals = obj_to_str(_globals).strip('"')
+    _closure = obj_to_str(_closure).strip('"')
+    _code = obj_to_str(str(co.co_code)[2:-1].encode().decode('unicode_escape'))
+
+    yield f'function("{func.__name__}"): ' \
+          f'{{"source": "{source}", "globals": {_globals}, "closure": {_closure}, "byte_code": {_code}}}'
+
+
+def function_to_str2(func):
+    source = inspect.getsource(func).replace('"', '\"').replace("'", '\'')
+    co = func.__code__
+    names = co.co_names
+    _globals = {names[oparg] for _, oparg in _walk_global_ops(co)}
+    _globals = {k: func.__globals__[k] for k in _globals if k in func.__globals__}
+    _closure = dict()
+    if func.__closure__ is not None:
+        _closure = dict((co.co_freevars[i], c.cell_contents) for i, c in enumerate(func.__closure__))
+
+    _names = obj_to_str([e for e in co.co_names if e not in _closure.keys()])
+    _globals = obj_to_str(_globals).strip('"')
+    _closure = obj_to_str(_closure).strip('"')
+    _code = obj_to_str(str(co.co_code)[2:-1].encode().decode('unicode_escape'))
+
+    yield f'function("{func.__name__}"): ' \
+          f'{{"source": "{source}", "names": {_names}, "globals": {_globals}, "closure": {_closure}, "byte_code": {_code}}}'
 
 
 def complex_to_str(obj):
@@ -134,3 +148,19 @@ def dict_to_str(obj):
             yield ', '
 
     yield '}'
+
+
+# function_to_str(1)
+# print(1)
+# func = f
+# source = inspect.getsource(func).replace('"', '\"').replace("'", '\'')
+# co = compile(source, '<string>', 'exec')
+# co = co.co_consts[0]
+# names = co.co_names
+# _globals = {names[oparg] for _, oparg in _walk_global_ops(co)}
+# _globals = {k: obj_to_str(func.__globals__[k]) for k in _globals if k in func.__globals__}
+# gl = dict(**_globals, **{'__builtins__': __builtins__})
+# _globals = obj_to_str(_globals)
+# fff = types.FunctionType(co, gl)
+# fff()
+# print(f'function("{func.__name__}"): {{"source": "{source}", "globals": {_globals}}}')

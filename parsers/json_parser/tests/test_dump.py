@@ -1,6 +1,7 @@
 import json
 import inspect
 from parsers.json_parser.dump import obj_to_str
+from parsers.json_parser.parser import JsonParser
 
 
 def test_kk():
@@ -27,20 +28,33 @@ def test_dict():
         assert obj_to_str(item) == json.dumps(item)
 
 
+a = 123
 def test_func():
     def f1():
         pass
+
     def f2(self):
         print(self)
-    def f3(a = []):
-        pass
-    f4 = lambda x, y: x + y
 
+    def f3(a=[]):
+        pass
+
+    f4 = lambda x, y: x + y
+    b = 333
+    f5 = lambda: print(a+b)
     to_remove = (' ', '\n', '\t')
     functions = (f1, f2, f3, f4)
     for func in functions:
+        bytes = str(func.__code__.co_code)[2:-1].encode().decode('unicode_escape')
         assert obj_to_str(func) == \
-               f'function("{func.__name__}"): "{inspect.getsource(func)}"'
+               f'function("{func.__name__}"): ' \
+               f'{{"source": "{inspect.getsource(func)}", ' \
+               f'"globals": {{}}, "closure": {{}}, "byte_code": "{bytes}"}}'
+    bytes = str(f5.__code__.co_code)[2:-1].encode().decode('unicode_escape')
+    print(obj_to_str(f5))
+    assert obj_to_str(f5) == \
+               f'function("{f5.__name__}"): {{"source": "{inspect.getsource(f5)}", ' \
+               f'"globals": {{"a": 123}}, "closure": {{"b": 333}}, "byte_code": "{bytes}"}}'
 
 
 class class1():

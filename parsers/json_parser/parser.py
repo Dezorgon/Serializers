@@ -21,8 +21,16 @@ class JsonParser(Parser):
             return ''
         return str_to_obj(s)
 
-def f():
-    print(1)
 
+def main():
+    k = 1233
+    b = 666
+    def f():
+        print(k+b)
+        print('EeeEeee')
+    doc = JsonParser().dumps(f)
+    print(doc)
+    ff = JsonParser().loads(doc)
+    ff()
 
-print(JsonParser().dumps(f))
+main()

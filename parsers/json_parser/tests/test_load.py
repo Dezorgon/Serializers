@@ -29,19 +29,19 @@ def test_dict():
         assert str_to_obj(obj_to_str(item)) == item
 
 
+b = 66
 def test_func():
     def f1():
-        pass
-    def f2(self):
-        print(self)
-    def f3(a = []):
-        pass
-    f4 = lambda x, y: x + y
+        return 1 + 3
+    a = 4
+    def f2():
+        return a + b
+    f3 = lambda: a + b
 
     to_remove = (' ', '\n', '\t')
-    functions = (f1, f2, f3, f4)
-    #for func in functions:
-        #assert str_to_obj(obj_to_str(func)) == func
+    functions = (f1, f2, f3)
+    for func in functions:
+        assert str_to_obj(obj_to_str(func))() == func()
 
 
 class class1():
