@@ -1,9 +1,9 @@
-from parsers.json_parser.dump import obj_to_str
-from parsers.json_parser.load import str_to_obj
-from serializer_creator.parser_interface import Parser
+from parsers.json_parser.dump import obj_to_str # pragma: no cover
+from parsers.json_parser.load import str_to_obj # pragma: no cover
+from serializer_creator.parser_interface import Parser # pragma: no cover
 
 
-class JsonParser(Parser):
+class JsonParser(Parser): # pragma: no cover
     def dump(self, obj, fp):
         fp.write(obj_to_str(obj))
 
@@ -22,15 +22,3 @@ class JsonParser(Parser):
         return str_to_obj(s)
 
 
-def main():
-    k = 1233
-    b = 666
-    def f():
-        print(k+b)
-        print('EeeEeee')
-    doc = JsonParser().dumps(f)
-    print(doc)
-    ff = JsonParser().loads(doc)
-    ff()
-
-main()

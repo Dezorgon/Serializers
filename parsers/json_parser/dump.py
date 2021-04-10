@@ -1,9 +1,7 @@
-import base64
 import dis
 import inspect
 import opcode
 import types
-from ast import literal_eval
 
 _simple_type = (str, bool, int, float)
 
@@ -70,7 +68,7 @@ def function_to_str(func):
           f'{{"source": "{source}", "globals": {_globals}, "closure": {_closure}, "byte_code": {_code}}}'
 
 
-def function_to_str2(func):
+def function_to_str2(func): # pragma: no cover
     source = inspect.getsource(func).replace('"', '\"').replace("'", '\'')
     co = func.__code__
     names = co.co_names
@@ -148,6 +146,9 @@ def dict_to_str(obj):
             yield ', '
 
     yield '}'
+
+
+
 
 
 # function_to_str(1)

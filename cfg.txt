@@ -1,1 +1,1 @@
-{"original_format": "pickle", "target_format": "json", "file_to_convert": "text.txt"}
+{"original_format": "toml", "target_format": "json", "file_to_convert": "text.txt"}

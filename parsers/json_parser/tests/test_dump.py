@@ -1,7 +1,6 @@
 import json
 import inspect
 from parsers.json_parser.dump import obj_to_str
-from parsers.json_parser.parser import JsonParser
 
 
 def test_kk():

@@ -13,7 +13,7 @@ def str_to_obj(doc):
     return obj
 
 
-def bind_methods(obj):
+def bind_methods(obj): # pragma: no cover
     funcs = dict(inspect.getmembers(obj, inspect.isfunction))
 
     for name in funcs:
@@ -109,7 +109,7 @@ def parse_function(tokens):
     return func
 
 
-def parse_function2(tokens):
+def parse_function2(tokens):# pragma: no cover
     def f():
         pass
 
