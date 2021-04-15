@@ -1,15 +1,12 @@
 from enum import Enum
-from serializer_creator.json_serializer_creator import JsonSerializerCreator
-from serializer_creator.yaml_serializer_creator import YamlSerializerCreator
-from serializer_creator.toml_serializer_creator import TomlSerializerCreator
-from serializer_creator.pickle_serializer_creator import PickleSerializerCreator
+from serializer_creator.serializer_creator import create_serializer
 
 
 class ParsersEnum(Enum):
-    JSON = JsonSerializerCreator
-    YAML = YamlSerializerCreator
-    TOML = TomlSerializerCreator
-    PICKLE = PickleSerializerCreator
+    JSON = 'Json'
+    YAML = 'Yaml'
+    TOML = 'Toml'
+    PICKLE = 'Pickle'
 
 
 def convert(deserializer, serializer, file_to_convert, file_to_save=None):
@@ -31,14 +28,12 @@ def convert(deserializer, serializer, file_to_convert, file_to_save=None):
         else:
             file_to_save = open(file_to_save, 'wb')
 
-    deserializer_creator = deserializer.value()
-    deserializer_obj = deserializer_creator.create_serializer()
+    deserializer_obj = create_serializer(deserializer.value)
     obj = deserializer_obj.load(file_to_convert)
     file_name = file_to_convert.name
     file_to_convert.close()
 
-    serializer_creator = serializer.value()
-    serializer_obj = serializer_creator.create_serializer()
+    serializer_obj = create_serializer(serializer.value)
     if file_to_save is None:
         if serializer == ParsersEnum.PICKLE:
             file_to_save = open(file_name, 'wb')
