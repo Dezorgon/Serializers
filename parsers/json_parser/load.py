@@ -1,19 +1,17 @@
-import copy
 import inspect
 import types
 from codecs import encode
-
 from parsers.json_parser.tokens import *
 
 
 def str_to_obj(doc):
     tokens = doc_to_tokens(doc)
-    obj = tokens_to_obj(tokens)
-    bind_methods(obj)
+    obj = _tokens_to_obj(tokens)
+    _bind_methods(obj)
     return obj
 
 
-def bind_methods(obj): # pragma: no cover
+def _bind_methods(obj): # pragma: no cover
     funcs = dict(inspect.getmembers(obj, inspect.isfunction))
 
     for name in funcs:
@@ -25,11 +23,11 @@ def bind_methods(obj): # pragma: no cover
 
     for name, val in inspect.getmembers(obj):
         if inspect.isclass(val) and not name.startswith('__'):
-            bind_methods(val)
+            _bind_methods(val)
 
 
-def tokens_to_obj(tokens):
-    parsers = (parse_function, parse_class, parse_object, parse_dict, parse_array)
+def _tokens_to_obj(tokens):
+    parsers = (_parse_function, _parse_class, _parse_object, _parse_dict, _parse_array)
 
     d = dict(zip(flags + ('{', '['), parsers))
 
@@ -39,7 +37,7 @@ def tokens_to_obj(tokens):
     return tokens.pop(0)
 
 
-def dict_to_obj(d, name):
+def _dict_to_obj(d, name):
     if not isinstance(d, dict):
         return d
 
@@ -52,21 +50,14 @@ def dict_to_obj(d, name):
     return obj
 
 
-def parse_object(tokens):
+def _parse_object(tokens):
     name = tokens.pop(0)
     tokens.pop(0)
-    obj_dict = parse_dict(tokens)
-    return dict_to_obj(obj_dict, name)
+    obj_dict = _parse_dict(tokens)
+    return _dict_to_obj(obj_dict, name)
 
 
-def parse_class(tokens):
-    # tokens.pop(0)
-    # if tokens[0] == 'class':
-    #    tokens.pop(0)
-    #    bases = tokens.pop(0)
-    # obj_dict = parse_dict(tokens)
-    # return type(name, (), obj_dict)
-
+def _parse_class(tokens):
     name = tokens.pop(0)
     d = {}
     source = tokens[0].strip()
@@ -75,19 +66,16 @@ def parse_class(tokens):
     return d[name]
 
 
-def _make_cell():
+def __make_cell():
     if False:
         cell = None
     return (lambda: cell).__closure__[0]
 
 
-def parse_function(tokens):
-    def f():
-        pass
-
+def _parse_function(tokens):
     name = tokens.pop(0)
     tokens.pop(0)
-    d = parse_dict(tokens)
+    d = _parse_dict(tokens)
 
     co: types.CodeType = compile(d['source'].strip(), '<string>', 'exec')
     co = co.co_consts[0]
@@ -101,7 +89,7 @@ def parse_function(tokens):
 
     closure = []
     for k in d['closure']:
-        cell = _make_cell()
+        cell = __make_cell()
         cell.cell_contents = d['closure'][k]
         closure.append(cell)
 
@@ -109,13 +97,13 @@ def parse_function(tokens):
     return func
 
 
-def parse_function2(tokens):# pragma: no cover
+def _parse_function2(tokens):# pragma: no cover
     def f():
         pass
 
     name = tokens.pop(0)
     tokens.pop(0)
-    d = parse_dict(tokens)
+    d = _parse_dict(tokens)
 
     co_freevars = tuple(d['closure'].keys())
     co_names = tuple(d['names'])
@@ -128,7 +116,7 @@ def parse_function2(tokens):# pragma: no cover
 
     closure = []
     for k in d['closure']:
-        cell = _make_cell()
+        cell = __make_cell()
         cell.cell_contents = d['closure'][k]
         closure.append(cell)
 
@@ -136,7 +124,7 @@ def parse_function2(tokens):# pragma: no cover
     return func
 
 
-def parse_dict(tokens):
+def _parse_dict(tokens):
     _object = {}
 
     if tokens[0] == '}':
@@ -149,7 +137,7 @@ def parse_dict(tokens):
         if tokens.pop(0) != ':':
             raise Exception()
 
-        val = tokens_to_obj(tokens)
+        val = _tokens_to_obj(tokens)
         _object[key] = val
 
         token = tokens.pop(0)
@@ -159,7 +147,7 @@ def parse_dict(tokens):
             raise Exception()
 
 
-def parse_array(tokens):
+def _parse_array(tokens):
     _array = []
 
     if tokens[0] == ']':
@@ -167,7 +155,7 @@ def parse_array(tokens):
         return _array
 
     while True:
-        val = tokens_to_obj(tokens)
+        val = _tokens_to_obj(tokens)
         _array.append(val)
 
         token = tokens.pop(0)
