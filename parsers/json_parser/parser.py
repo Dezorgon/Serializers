@@ -1,6 +1,6 @@
 from parsers.json_parser.dump import obj_to_str # pragma: no cover
 from parsers.json_parser.load import str_to_obj # pragma: no cover
-from serializer_creator.parser_interface import Parser # pragma: no cover
+from parsers.serializer_creator.parser_interface import Parser # pragma: no cover
 
 
 class JsonParser(Parser): # pragma: no cover
@@ -22,3 +22,8 @@ class JsonParser(Parser): # pragma: no cover
         return str_to_obj(s)
 
 
+# a = 123
+# def f():
+#     print(a)
+#
+# print(JsonParser().dumps(f))

@@ -1,5 +1,5 @@
 import pickle
-from serializer_creator.parser_interface import Parser
+from parsers.serializer_creator.parser_interface import Parser
 from parsers.converter import serialize, deserialize
 
 

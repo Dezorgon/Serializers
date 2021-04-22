@@ -1,7 +1,7 @@
-from serializer_creator.json_serializer_creator import JsonSerializerCreator
-from serializer_creator.pickle_serializer_creator import PickleSerializerCreator
-from serializer_creator.toml_serializer_creator import TomlSerializerCreator
-from serializer_creator.yaml_serializer_creator import YamlSerializerCreator
+from parsers.serializer_creator import JsonSerializerCreator
+from parsers.serializer_creator.pickle_serializer_creator import PickleSerializerCreator
+from parsers.serializer_creator import TomlSerializerCreator
+from parsers.serializer_creator.yaml_serializer_creator import YamlSerializerCreator
 
 
 def create_serializer(serializer: str):
